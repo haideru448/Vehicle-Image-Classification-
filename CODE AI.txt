@@ -1,0 +1,102 @@
+
+STEP1 
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.optimizers import RMSprop
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import cv2
+import os
+import numpy as np
+#loading all of the import libraries that are needed within project
+
+  
+STEP 2 
+
+img=image.load_img("Training data/Cook/1.jpg") #loading an image in img variable
+
+STEP 3
+
+plt.imshow(img) #showing an image
+
+
+
+STEP 4
+cv2.imread("Training data/Cook/6.jpg").shape #used  for reading image dimensions
+
+
+STEP 5
+
+train=ImageDataGenerator(rescale=1/255)  #Original images are in RGB coefficients in which we have 0 to 255 values 
+Validation=ImageDataGenerator(rescale=1/255) #0 to 255 is difficult to process for neural networks that's why we multiply values with rescale for lower values
+
+STEP6 
+
+train_dataset=train.flow_from_directory('Training data/',target_size=(200,200),batch_size=50,class_mode='categorical')
+
+validation_dataset=Validation.flow_from_directory('Validation data/',target_size=(200,200),batch_size=50,class_mode='categorical')
+
+
+STEP 7
+
+train_dataset.class_indices
+
+STEP8
+
+train_dataset.classes
+
+
+STEP 9 
+model=tf.keras.models.Sequential([tf.keras.layers.Conv2D(16,(3,3),activation='relu',input_shape=(200,200,3)),
+                                tf.keras.layers.MaxPool2D(2,2),
+                                 
+                                tf.keras.layers.Conv2D(32,(3,3),activation='relu'),
+                                tf.keras.layers.MaxPool2D(2,2),
+                                 
+                                 tf.keras.layers.Conv2D(64,(3,3),activation='relu'),
+                                tf.keras.layers.MaxPool2D(2,2),
+                                 
+                                 
+                                 tf.keras.layers.Flatten(),
+                                 
+                                 tf.keras.layers.Dense(512,activation='relu'),
+                                 tf.keras.layers.Dense(1,activation='softmax'),
+                                
+                                ])
+
+
+STEP 10
+
+model.compile(loss='categorical_crossentropy',
+             optimizer=RMSprop(lr=0.001),
+             metrics=['accuracy'])
+
+
+STEP 11 
+
+model_fit= model.fit(train_dataset,
+                    steps_per_epoch=8,
+                    epochs=30,
+                     validation_data=validation_dataset)
+
+
+STEP 12 
+dir_path='Testing data/all'
+for i in os.listdir(dir_path):
+    img=image.load_img(dir_path+'//'+i,target_size=(200,200))
+    plt.imshow(img)
+    plt.show()
+    
+    X=image.img_to_array(img)
+    X=np.expand_dims(X, axis= 0)
+    images=np.vstack([X])
+    val=model.predict(images)
+    if val[0][0]==1:
+        print("cook")
+    elif val[0][1]==1:
+        print("Doctor")
+    else:
+        print("firefighter")
+
+   
+
